@@ -49,25 +49,25 @@ public static class API
 
     public static class Catalog
     {
-        public static string GetAllCatalogItems(string baseUri, int page, int take, int? brand, int? type)
+        public static string GetAllCatalogItems(string baseUri, int page, int take, string search)
         {
-            var filterQs = "";
+            var filterQs = string.IsNullOrEmpty(search) ? "" : $"/withsemantic/{search}";
 
-            if (type.HasValue)
-            {
-                var brandQs = (brand.HasValue) ? brand.Value.ToString() : string.Empty;
-                filterQs = $"/type/{type.Value}/brand/{brandQs}";
+            //if (type.HasValue)
+            //{
+            //    var brandQs = (brand.HasValue) ? brand.Value.ToString() : string.Empty;
+            //    filterQs = $"/type/{type.Value}/brand/{brandQs}";
 
-            }
-            else if (brand.HasValue)
-            {
-                var brandQs = (brand.HasValue) ? brand.Value.ToString() : string.Empty;
-                filterQs = $"/type/all/brand/{brandQs}";
-            }
-            else
-            {
-                filterQs = string.Empty;
-            }
+            //}
+            //else if (brand.HasValue)
+            //{
+            //    var brandQs = (brand.HasValue) ? brand.Value.ToString() : string.Empty;
+            //    filterQs = $"/type/all/brand/{brandQs}";
+            //}
+            //else
+            //{
+            //    filterQs = string.Empty;
+            //}
 
             return $"{baseUri}items{filterQs}?pageIndex={page}&pageSize={take}";
         }

@@ -1,4 +1,11 @@
-﻿namespace Microsoft.eShopOnContainers.Services.Catalog.API.Controllers;
+﻿using Azure;
+using Azure.AI.OpenAI;
+using Microsoft.SemanticKernel.AI.Embeddings;
+using Microsoft.SemanticKernel.Connectors.AI.OpenAI.TextEmbedding;
+using Microsoft.SemanticKernel.Connectors.Memory.Sqlite;
+using Microsoft.SemanticKernel.Memory;
+
+namespace Microsoft.eShopOnContainers.Services.Catalog.API.Controllers;
 
 [Route("api/v1/[controller]")]
 [ApiController]
@@ -7,6 +14,9 @@ public class CatalogController : ControllerBase
     private readonly CatalogContext _catalogContext;
     private readonly CatalogSettings _settings;
     private readonly ICatalogIntegrationEventService _catalogIntegrationEventService;
+
+    private const string AoaiKey = "TODO GET KEY FROM KEY VAULT";
+    private const string AoaiEndpoint = "TODO GET ENDPOINT FROM CONFIG";
 
     public CatalogController(CatalogContext context, IOptionsSnapshot<CatalogSettings> settings, ICatalogIntegrationEventService catalogIntegrationEventService)
     {
@@ -112,6 +122,46 @@ public class CatalogController : ControllerBase
             .Skip(pageSize * pageIndex)
             .Take(pageSize)
             .ToListAsync();
+
+        itemsOnPage = ChangeUriPlaceholder(itemsOnPage);
+
+        return new PaginatedItemsViewModel<CatalogItem>(pageIndex, pageSize, totalItems, itemsOnPage);
+    }
+
+    // GET api/v1/[controller]/items/withsemantic/text[?pageSize=3&pageIndex=10]
+    [HttpGet]
+    [Route("items/withsemantic/{text:minlength(1)}")]
+    public async Task<ActionResult<PaginatedItemsViewModel<CatalogItem>>> ItemsWithSemanticAsync(string text, [FromQuery] int pageSize = 10, [FromQuery] int pageIndex = 0)
+    {
+        await EnsureMemoryStore();
+
+        var client = new OpenAIClient(new Uri(AoaiEndpoint), new AzureKeyCredential(AoaiKey));
+
+        // TODO: This is a hack for demo purposes and is just a placeholder until the catalog db is
+        // replaced by one in which we can include embedding vectors as part of each catalog entry.
+        // At that point, the query we issue will include the embedding vector for the text we are
+        // searching for, and we'll ask the db to include similarity as part of its query. For now for
+        // demo purposes, this is just fetching the whole catalog and filtering/sorting it ourselves.
+
+        var idsAndScores = new Dictionary<int, double>();
+        await foreach (var result in s_semanticTextMemory.SearchAsync(nameof(Catalog), text, limit: int.MaxValue, minRelevanceScore: 0.78))
+        {
+            if (int.TryParse(result.Metadata.Id, CultureInfo.InvariantCulture, out int id))
+            {
+                idsAndScores.TryAdd(id, result.Relevance);
+            }
+        }
+
+        var items = _catalogContext.CatalogItems.ToList();
+        items.RemoveAll(item => !idsAndScores.ContainsKey(item.Id));
+        items.Sort((x, y) => idsAndScores[y.Id].CompareTo(idsAndScores[x.Id]));
+
+        var totalItems = items.LongCount();
+
+        var itemsOnPage = items
+            .Skip(pageSize * pageIndex)
+            .Take(pageSize)
+            .ToList();
 
         itemsOnPage = ChangeUriPlaceholder(itemsOnPage);
 
@@ -246,6 +296,11 @@ public class CatalogController : ControllerBase
 
         await _catalogContext.SaveChangesAsync();
 
+        // TODO: Once we have embedding vectors in the catalog db, this will be replaced with
+        // updating item with its embedding vector prior to saving it.
+        await EnsureMemoryStore();
+        await SaveItemReference(item);
+
         return CreatedAtAction(nameof(ItemByIdAsync), new { id = item.Id }, null);
     }
 
@@ -281,5 +336,46 @@ public class CatalogController : ControllerBase
         }
 
         return items;
+    }
+
+    // TODO: This is all temporary and will go away once we have a real catalog db that includes embedding vectors
+    private static readonly SemaphoreSlim s_lock = new SemaphoreSlim(1, 1);
+    private static ISemanticTextMemory s_semanticTextMemory;
+    private static ITextEmbeddingGeneration s_embeddingGeneration;
+
+    private static Task SaveItemReference(CatalogItem item) =>
+        s_semanticTextMemory.SaveReferenceAsync(nameof(Catalog), $"""{item.Name} {item.Description}""", item.Id.ToString(CultureInfo.InvariantCulture), nameof(Catalog), item.Description);
+
+    private async Task EnsureMemoryStore()
+    {
+        if (s_semanticTextMemory is null)
+        {
+            await s_lock.WaitAsync();
+            try
+            {
+                if (s_semanticTextMemory is null)
+                {
+                    var memoryStore = await SqliteMemoryStore.ConnectAsync("catalog.sqlitedb");
+                    s_embeddingGeneration = new AzureTextEmbeddingGeneration(
+                            "TextEmbeddingAda002_1",
+                            AoaiEndpoint,
+                            AoaiKey);
+                    s_semanticTextMemory = new SemanticTextMemory(memoryStore, s_embeddingGeneration);
+
+                    IList<string> collections = await s_semanticTextMemory.GetCollectionsAsync();
+                    if (!collections.Contains(nameof(Catalog)))
+                    {
+                        await foreach (var item in _catalogContext.CatalogItems)
+                        {
+                            await SaveItemReference(item);
+                        }
+                    }
+                }
+            }
+            finally
+            {
+                s_lock.Release();
+            }
+        }
     }
 }

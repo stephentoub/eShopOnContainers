@@ -17,9 +17,9 @@ public class CatalogService : ICatalogService
         _remoteServiceBaseUrl = $"{_settings.Value.PurchaseUrl}/c/api/v1/catalog/";
     }
 
-    public async Task<Catalog> GetCatalogItems(int page, int take, int? brand, int? type)
+    public async Task<Catalog> GetCatalogItems(int page, int take, string search)
     {
-        var uri = API.Catalog.GetAllCatalogItems(_remoteServiceBaseUrl, page, take, brand, type);
+        var uri = API.Catalog.GetAllCatalogItems(_remoteServiceBaseUrl, page, take, search);
 
         var responseString = await _httpClient.GetStringAsync(uri);
 
