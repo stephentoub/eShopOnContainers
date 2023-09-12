@@ -1,1 +1,6 @@
-﻿<button class="concierge" title="Open .NET Concierge"></button>
+﻿<button class="show-concierge" title="Open .NET Concierge" onclick="document.querySelector('.concierge').classList.add('visible')"></button>
+
+<div class="concierge">
+    <button class="hide-concierge" onclick="document.querySelector('.concierge').classList.remove('visible')">X</button>
+    Hello, this is the concierge.
+</div>

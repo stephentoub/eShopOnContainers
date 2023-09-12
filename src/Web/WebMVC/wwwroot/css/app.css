@@ -86,11 +86,10 @@ a:visited {
     }
 
 
-.concierge {
+.show-concierge {
     position: fixed;
     bottom: 5rem;
     right: 3rem;
-    background-color: white;
     z-index: 10;
     box-shadow: 0 2px 7px 2px rgba(0,0,0,0.2);
     border-radius: 10px;
@@ -105,14 +104,34 @@ a:visited {
     border: 2px solid transparent;
 }
 
-    .concierge:hover {
+    .show-concierge:hover {
         border-color: #49b4fe;
         cursor: pointer;
         transform: scale(1.2);
         box-shadow: 0 2px 7px 2px rgba(0,0,0,0.4);
     }
 
-    .concierge:active {
+    .show-concierge:active {
         transform: scale(1.1);
         transition: transform ease-out 0.01s;
+    }
+
+.concierge {
+    position: fixed;
+    right: 1rem;
+    bottom: 2rem;
+    width: 25rem;
+    height: 35rem;
+    padding: 1rem;
+    z-index: 10;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 7px 2px rgba(0,0,0,0.2);
+    background-color: #f3f4f3;
+    transform: translateX(30rem);
+    transition: transform ease-in-out 0.25s;
+    will-change: transform;
+}
+
+    .concierge.visible {
+        transform: translateX(0);
     }
