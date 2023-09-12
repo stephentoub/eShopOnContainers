@@ -122,7 +122,7 @@ a:visited {
     bottom: 2rem;
     width: 25rem;
     height: 35rem;
-    padding: 1rem;
+    padding: 0;
     z-index: 10;
     border-radius: 0.5rem;
     box-shadow: 0 2px 7px 2px rgba(0,0,0,0.2);
@@ -130,77 +130,27 @@ a:visited {
     transform: translateX(30rem);
     transition: transform ease-in-out 0.25s;
     will-change: transform;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
 }
 
     .concierge.visible {
         transform: translateX(0);
     }
 
-.concierge-input {
-    margin-top: auto;
-    display: flex;
-    position: relative;
-    border: 2px solid black;
-    border-radius: 0.5rem;
-    padding: 0.5rem;
-    gap: 0.3rem;
-    height: 5.5rem;
-    align-items: stretch;
-    flex-shrink: 0;
-}
-
-    .concierge-input textarea {
-        width: 100%;
-        background: none;
+    .concierge .hide-concierge {
         border: none;
-        outline: none;
-        resize: none;
+        background-color: #5c5c5c;
+        color: white;
+        position: absolute;
+        top: 0.25rem;
+        right: 0.25rem;
+        border-radius: 0.35rem;
+        width: 2rem;
+        height: 2rem;
+        z-index: 10;
     }
 
-    .concierge-input button {
-        width: 4rem
+    .concierge iframe {
+        position: relative;
+        height: 100%;
+        width: 100%;
     }
-
-.concierge .hide-concierge {
-    border: none;
-    background-color: #5c5c5c;
-    color: white;
-    position: absolute;
-    top: 0.25rem;
-    right: 0.25rem;
-    border-radius: 0.35rem;
-    width: 2rem;
-    height: 2rem;
-}
-
-.concierge-chat {
-    overflow-y: auto;
-    height: 100%;
-    padding-right: 1.2rem;
-    margin-right: -0.85rem;
-    display: flex;
-    flex-direction: column;
-    font-weight: 400;
-    font-family: "Segoe UI", arial, helvetica;
-}
-    .concierge-chat .message, .concierge-chat p {
-        padding: 0.5rem 1rem;
-        border-radius: 0.5rem;
-        max-width: 85%;
-        display: inline-block;
-        white-space: break-spaces;
-    }
-
-        .concierge-chat .message-received, .concierge-chat p:nth-of-type(2n+1) {
-            background-color: #dbdada;
-            margin-right: auto;
-        }
-
-        .concierge-chat .message-sent, .concierge-chat p:nth-of-type(2n) {
-            background-color: #1369e9;
-            margin-left: auto;
-            color: white;
-        }

@@ -1,25 +1,6 @@
-﻿<button class="show-concierge" title="Open .NET Concierge" onclick="document.querySelector('.concierge').classList.add('visible'); document.querySelector('.concierge textarea').focus()"></button>
+﻿<button class="show-concierge" title="Open .NET Concierge" onclick="document.querySelector('.concierge').classList.add('visible');"></button>
 
 <div class="concierge">
     <button class="hide-concierge" title="Close .NET Concierge" onclick="document.querySelector('.concierge').classList.remove('visible')">X</button>
-
-    <div class="concierge-chat">
-        <p>Hello, this is the concierge.</p>
-        <p>Hello, this is the concierge.</p>
-        <p>Hello, this is the concierge. This is a longer message over multiple lines.
-
-Here's another paragraph.
-Just a linebreak.
-
-Great!</p>
-        <p>Hello, this is the concierge. This is a longer message over multiple lines.</p>
-        <p>Hello, this is the concierge.</p>
-        <p>Hello, this is the concierge.</p>
-        <p>Hello, this is the concierge.</p>
-    </div>
-    
-    <div class="concierge-input">
-        <textarea placeholder="Start chatting..."></textarea>
-        <button title="Send">Send</button>
-    </div>
+    <iframe src="~/concierge"></iframe>
 </div>
