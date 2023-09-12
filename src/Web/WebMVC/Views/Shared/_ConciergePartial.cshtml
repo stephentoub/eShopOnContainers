@@ -1,0 +1,20 @@
+﻿<button class="show-concierge" title="Open .NET Concierge" onclick="toggleConcierge(true)"></button>
+
+<div class="concierge">
+    <button class="hide-concierge" title="Close .NET Concierge" onclick="toggleConcierge(false)">X</button>
+    <iframe src="about:blank"></iframe>
+</div>
+
+<script>
+    function toggleConcierge(show) {
+        const elem = document.querySelector('.concierge');
+        const iframe = elem.querySelector('iframe');
+        if (show) {
+            iframe.src = '/concierge';
+            elem.classList.add('visible');
+        } else {
+            iframe.src = 'about:blank';
+            elem.classList.remove('visible');
+        }
+    }
+</script>

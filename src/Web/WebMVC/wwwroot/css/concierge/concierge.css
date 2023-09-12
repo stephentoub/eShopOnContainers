@@ -1,0 +1,12 @@
+﻿html.concierge-host, html.concierge-host body {
+    padding: 0;
+    margin: 0;
+}
+
+    html.concierge-host body {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        font-weight: 400;
+        font-family: "Segoe UI", arial, helvetica;
+    }

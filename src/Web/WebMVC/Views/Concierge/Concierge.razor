@@ -1,0 +1,60 @@
+﻿@inject IJSRuntime JS
+
+<div class="concierge-chat" @ref="chat">
+    @foreach (var message in chatState.Messages.Where(m => m.Role == ChatRole.Assistant || m.Role == ChatRole.User))
+    {
+        if (!string.IsNullOrEmpty(message.Content))
+        {
+            <p @key="@message" class="message message-@message.Role">@MessageProcessor.AllowImages(message.Content)</p>
+        }
+    }
+
+    @if (thinking)
+    {
+        <p class="thinking">Thinking...</p>
+    }
+</div>
+
+<form class="concierge-input" @onsubmit="SendMessageAsync">
+    <textarea placeholder="Start chatting..." @ref="@textbox" @bind="messageToSend" @bind:event="oninput" @onkeydown="SendOnEnterAsync"></textarea>
+    <button type="submit" title="Send">Send</button>
+</form>
+
+@code {
+    readonly ChatState chatState = new();
+    ElementReference textbox;
+    ElementReference chat;
+    string messageToSend;
+    bool thinking;
+
+    private async Task SendMessageAsync()
+    {
+        var messageCopy = messageToSend?.Trim();
+        messageToSend = null;
+
+        if (!string.IsNullOrEmpty(messageCopy))
+        {
+            thinking = true;
+            await chatState.AddUserMessageAsync(messageCopy, onMessageAdded: StateHasChanged);
+            thinking = false;
+        }
+    }
+
+    private async Task SendOnEnterAsync(KeyboardEventArgs eventArgs)
+    {
+        if (eventArgs.Key == "Enter" && !eventArgs.ShiftKey)
+        {
+            await SendMessageAsync();
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await textbox.FocusAsync();
+        }
+
+        await JS.InvokeVoidAsync("scrollToEnd", chat);
+    }
+}

@@ -84,3 +84,73 @@ a:visited {
         color: #75B918;
         transition: color 0.35s;
     }
+
+
+.show-concierge {
+    position: fixed;
+    bottom: 5rem;
+    right: 3rem;
+    z-index: 10;
+    box-shadow: 0 2px 7px 2px rgba(0,0,0,0.2);
+    border-radius: 10px;
+    background-image: url('/images/concierge.png');
+    background-size: contain;
+    width: 5rem;
+    height: 3.5rem;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-color: #f3f4f3;
+    transition: transform ease-out 0.2s;
+    border: 2px solid transparent;
+}
+
+    .show-concierge:hover {
+        border-color: #49b4fe;
+        cursor: pointer;
+        transform: scale(1.2);
+        box-shadow: 0 2px 7px 2px rgba(0,0,0,0.4);
+    }
+
+    .show-concierge:active {
+        transform: scale(1.1);
+        transition: transform ease-out 0.01s;
+    }
+
+.concierge {
+    position: fixed;
+    right: -30rem;
+    bottom: 2rem;
+    width: 25rem;
+    height: 35rem;
+    padding: 0;
+    z-index: 10;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 7px 2px rgba(0,0,0,0.2);
+    background-color: #f3f4f3;
+    transform: translateX(0rem);
+    transition: transform ease-in-out 0.25s;
+    will-change: transform;
+}
+
+    .concierge.visible {
+        transform: translateX(-31rem);
+    }
+
+    .concierge .hide-concierge {
+        border: none;
+        background-color: #5c5c5c;
+        color: white;
+        position: absolute;
+        top: 0.25rem;
+        right: 0.18rem;
+        border-radius: 0.35rem;
+        width: 2rem;
+        height: 2rem;
+        z-index: 10;
+    }
+
+    .concierge iframe {
+        position: relative;
+        height: 100%;
+        width: 100%;
+    }

@@ -9,6 +9,7 @@ builder.Services.AddHealthChecks(builder.Configuration);
 builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddAuthenticationServices(builder.Configuration);
 builder.Services.AddHttpClientServices();
+builder.Services.AddServerSideBlazor();
 
 var app = builder.Build();
 
@@ -29,6 +30,7 @@ app.MapControllerRoute("default", "{controller=Catalog}/{action=Index}/{id?}");
 app.MapControllerRoute("defaultError", "{controller=Error}/{action=Error}");
 app.MapControllers();
 app.MapForwardSignalR();
+app.MapBlazorHub();
 
 WebContextSeed.Seed(app, app.Environment);
 
