@@ -22,6 +22,7 @@
   <ItemGroup>
     <PackageReference Include="AspNetCore.HealthChecks.UI.Client" />
     <PackageReference Include="AspNetCore.HealthChecks.Uris" />
+    <PackageReference Include="Azure.AI.OpenAI" />
     <PackageReference Include="BuildBundlerMinifier" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" />
     <PackageReference Include="Microsoft.AspNetCore.DataProtection.StackExchangeRedis" />

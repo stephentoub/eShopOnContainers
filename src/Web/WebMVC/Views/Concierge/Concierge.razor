@@ -1,9 +1,10 @@
-﻿@inject IJSRuntime JS
+﻿@using Azure.AI.OpenAI
+@inject IJSRuntime JS
 
 <div class="concierge-chat" @ref="chat">
-    @foreach (var message in messages)
+    @foreach (var message in chatState.Messages.Where(m => m.Role == ChatRole.Assistant || m.Role == ChatRole.User))
     {
-        <p @key="@message" class="message message-@message.MessageType">@message.Text</p>
+        <p @key="@message" class="message message-@message.Role">@message.Content</p>
     }
 </div>
 
@@ -13,26 +14,23 @@
 </form>
 
 @code {
+    readonly ChatState chatState = new();
     ElementReference textbox;
     ElementReference chat;
     string messageToSend;
     bool scrollToEndAfterRender;
-    List<ChatMessage> messages = new List<ChatMessage>
-    {
-        new ChatMessage { MessageType = ChatMessage.ChatMessageType.Received, Text = "Hi! I'm the .NET Concierge. How can I help?" }
-    };
 
-    private Task SendMessageAsync()
+    private async Task SendMessageAsync()
     {
-        messageToSend = messageToSend?.Trim();
-        if (!string.IsNullOrEmpty(messageToSend))
+        var messageCopy = messageToSend?.Trim();
+        messageToSend = null;
+
+        if (!string.IsNullOrEmpty(messageCopy))
         {
-            messages.Add(new ChatMessage { MessageType = ChatMessage.ChatMessageType.Sent, Text = messageToSend });
-            messageToSend = null;
-            scrollToEndAfterRender = true;            
+            scrollToEndAfterRender = true;
+            await chatState.AddUserMessageAndGetResponseAsync(messageCopy);   
+            scrollToEndAfterRender = true;
         }
-
-        return Task.CompletedTask;
     }
 
     private async Task SendOnEnterAsync(KeyboardEventArgs eventArgs)

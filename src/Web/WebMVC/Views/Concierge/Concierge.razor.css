@@ -45,12 +45,12 @@
         margin-top: 0.25rem;
     }
 
-        .concierge-chat .message-Received {
+        .concierge-chat .message-assistant {
             background-color: #dbdada;
             margin-right: auto;
         }
 
-        .concierge-chat .message-Sent {
+        .concierge-chat .message-user {
             background-color: #1369e9;
             margin-left: auto;
             color: white;
