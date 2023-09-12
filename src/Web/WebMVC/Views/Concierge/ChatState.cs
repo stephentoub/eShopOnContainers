@@ -74,9 +74,9 @@ public class ChatState
 
     public IList<ChatMessage> Messages => _completionsOptions.Messages;
 
-    public async Task AddUserMessageAsync(string text, Action onMessageAdded)
+    public async Task AddUserMessageAsync(string userText, Action onMessageAdded)
     {
-        _completionsOptions.Messages.Add(new ChatMessage(ChatRole.User, text));
+        _completionsOptions.Messages.Add(new ChatMessage(ChatRole.User, userText));
         onMessageAdded();
 
         try
@@ -89,12 +89,39 @@ public class ChatState
             while (true)
             {
 #if FAKE_OPENAI
-                await Task.Delay(4000);
-                choice = new FakeChatChoice
+                await Task.Delay(1000);
+
+                if (userText.StartsWith("search "))
                 {
-                    FinishReason = CompletionsFinishReason.Stopped,
-                    Message = new ChatMessage(ChatRole.Assistant, "That's nice, thanks.")
-                };
+                    choice = new FakeChatChoice
+                    {
+                        FinishReason = CompletionsFinishReason.FunctionCall,
+                        Message = new ChatMessage(ChatRole.Assistant, "I will search for that.")
+                    };
+                    choice.Message.FunctionCall = new FunctionCall(SearchCatalogFunctionName, JsonSerializer.Serialize(new
+                    {
+                        product_description = userText.Substring("search ".Length)
+                    }));
+                    userText = "";
+                }
+                else if (userText.StartsWith("basket"))
+                {
+                    choice = new FakeChatChoice
+                    {
+                        FinishReason = CompletionsFinishReason.FunctionCall,
+                        Message = new ChatMessage(ChatRole.Assistant, "I will add that to your basket.")
+                    };
+                    choice.Message.FunctionCall = new FunctionCall(AddToBasketFunctionName, "{}");
+                    userText = "";
+                }
+                else
+                {
+                    choice = new FakeChatChoice
+                    {
+                        FinishReason = CompletionsFinishReason.Stopped,
+                        Message = new ChatMessage(ChatRole.Assistant, "That's nice, thanks.")
+                    };
+                }
 #else
                 var response = await _client.GetChatCompletionsAsync(aoaiModel, _completionsOptions);
                 choice = response.Value.Choices[0];
@@ -114,7 +141,7 @@ public class ChatState
                         string productDescription = JsonNode.Parse(choice.Message.FunctionCall.Arguments)?["product_description"]?.ToString();
                         try
                         {
-                            productDescription = await new HttpClient().GetStringAsync($"http://localhost:5222/api/v1/Catalog/items/withsemantic/{WebUtility.UrlEncode(productDescription)}?pageSize=3&pageIndex=0");
+                            productDescription = await new HttpClient().GetStringAsync($"http://webshoppingagg/c/api/v1/catalog/items/withsemantic/{WebUtility.UrlEncode(productDescription)}?pageSize=3&pageIndex=0");
                         }
                         catch (HttpRequestException)
                         {
