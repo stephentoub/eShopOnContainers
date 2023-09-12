@@ -56,15 +56,19 @@
             color: white;
         }
 
-.thinking {
-    color: gray;
-    font-style: italic;
-    animation: fade-in-and-out 1s infinite;
-    padding: 0;
-    margin: 0;
-    padding-left: 0.6rem;
-    font-size: 90%;
-}
+    .concierge-chat ::deep img {
+        max-height: 10rem;
+    }
+
+    .thinking {
+        color: gray;
+        font-style: italic;
+        animation: fade-in-and-out 1s infinite;
+        padding: 0;
+        margin: 0;
+        padding-left: 0.6rem;
+        font-size: 90%;
+    }
 
 @keyframes fade-in-and-out {
     0% {

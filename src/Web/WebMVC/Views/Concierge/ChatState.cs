@@ -85,17 +85,20 @@ public class ChatState
             {
                 var response = await _client.GetChatCompletionsAsync(aoaiModel, _completionsOptions);
                 choice = response.Value.Choices[0];
-                _completionsOptions.Messages.Add(choice.Message);
-                onMessageAdded();
 
                 if (choice.FinishReason != CompletionsFinishReason.FunctionCall)
                 {
+                    _completionsOptions.Messages.Add(choice.Message);
+                    onMessageAdded();
                     return;
                 }
 
                 switch (choice.Message.FunctionCall.Name)
                 {
                     case SearchCatalogFunctionName:
+                        _completionsOptions.Messages.Add(new ChatMessage(ChatRole.Assistant, "Searching the catalog..."));
+                        onMessageAdded();
+
                         string productDescription = JsonNode.Parse(choice.Message.FunctionCall.Arguments)?["product_description"]?.ToString();
                         try
                         {

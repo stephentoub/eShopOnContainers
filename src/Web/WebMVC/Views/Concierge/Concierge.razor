@@ -1,15 +1,11 @@
 ﻿@inject IJSRuntime JS
 
 <div class="concierge-chat" @ref="chat">
-    @foreach (var message in chatState.Messages.Where(m => m.Role == ChatRole.Assistant || m.Role == ChatRole.User || m.Role == ChatRole.Function))
+    @foreach (var message in chatState.Messages.Where(m => m.Role == ChatRole.Assistant || m.Role == ChatRole.User))
     {
-        if (message.Role == ChatRole.Function && message.Name == ChatState.SearchCatalogFunctionName)
+        if (!string.IsNullOrEmpty(message.Content))
         {
-            <SearchResults @key="@message" Message="@message" />
-        }
-        else
-        {
-            <p @key="@message" class="message message-@message.Role">@message.Content</p>
+            <p @key="@message" class="message message-@message.Role">@MessageProcessor.AllowImages(message.Content)</p>
         }
     }
 
