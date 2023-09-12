@@ -15,6 +15,17 @@ public class ChatState
     const string SearchCatalogFunctionName = "search_catalog";
     const string AddToBasketFunctionName = "add_to_basket";
 
+#if FAKE_OPENAI
+    string[] RandomMessages = new[]
+    {
+        "That's nice, thanks",
+        "Are you sure?",
+        "As an AI language model, I'm not allowed to have an opinion about that. Let's talk about something else.",
+        "Remember to check out our awesome .NET apparel. It's perfect for weddings and funerals.",
+        "This would be a lot better with Azure OpenAI keys."
+    };
+#endif
+
     private readonly OpenAIClient _client;
     private readonly ChatCompletionsOptions _completionsOptions;
 
@@ -119,7 +130,7 @@ public class ChatState
                     choice = new FakeChatChoice
                     {
                         FinishReason = CompletionsFinishReason.Stopped,
-                        Message = new ChatMessage(ChatRole.Assistant, "That's nice, thanks.")
+                        Message = new ChatMessage(ChatRole.Assistant, RandomMessages[Random.Shared.Next(RandomMessages.Length)])
                     };
                 }
 #else
