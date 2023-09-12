@@ -1,7 +1,6 @@
-﻿#define FAKE_OPENAI
-
-using System.Net;
+﻿using System.Net;
 using System.Text.Json.Nodes;
+using Azure;
 using Azure.AI.OpenAI;
 
 namespace WebMVC.Views.Concierge;
@@ -14,17 +13,6 @@ public class ChatState
 
     public const string SearchCatalogFunctionName = "search_catalog";
     public const string AddToBasketFunctionName = "add_to_basket";
-
-#if FAKE_OPENAI
-    string[] RandomMessages = new[]
-    {
-        "That's nice, thanks",
-        "Are you sure?",
-        "As an AI language model, I'm not allowed to have an opinion about that. Let's talk about something else.",
-        "Remember to check out our awesome .NET apparel. It's perfect for weddings and funerals.",
-        "This would be a lot better with Azure OpenAI keys."
-    };
-#endif
 
     private readonly OpenAIClient _client;
     private readonly ChatCompletionsOptions _completionsOptions;
@@ -92,52 +80,11 @@ public class ChatState
 
         try
         {
-#if FAKE_OPENAI
-            FakeChatChoice choice;
-#else
             ChatChoice choice;
-#endif
             while (true)
             {
-#if FAKE_OPENAI
-                await Task.Delay(1000);
-
-                if (userText.StartsWith("find ", StringComparison.CurrentCultureIgnoreCase))
-                {
-                    choice = new FakeChatChoice
-                    {
-                        FinishReason = CompletionsFinishReason.FunctionCall,
-                        Message = new ChatMessage(ChatRole.Assistant, "OK, I'll check the catalog.")
-                    };
-                    choice.Message.FunctionCall = new FunctionCall(SearchCatalogFunctionName, JsonSerializer.Serialize(new
-                    {
-                        product_description = userText.Substring("search ".Length)
-                    }));
-                    userText = "";
-                }
-                else if (userText.Contains("basket"))
-                {
-                    choice = new FakeChatChoice
-                    {
-                        FinishReason = CompletionsFinishReason.FunctionCall,
-                        Message = new ChatMessage(ChatRole.Assistant, "OK, I'll add that to your basket.")
-                    };
-                    choice.Message.FunctionCall = new FunctionCall(AddToBasketFunctionName, "{}");
-                    userText = "";
-                }
-                else
-                {
-                    choice = new FakeChatChoice
-                    {
-                        FinishReason = CompletionsFinishReason.Stopped,
-                        Message = new ChatMessage(ChatRole.Assistant, RandomMessages[new Random().Next(RandomMessages.Length)])
-                    };
-                }
-#else
                 var response = await _client.GetChatCompletionsAsync(aoaiModel, _completionsOptions);
                 choice = response.Value.Choices[0];
-#endif
-
                 _completionsOptions.Messages.Add(choice.Message);
                 onMessageAdded();
 
@@ -174,17 +121,9 @@ public class ChatState
                 }
             }
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            _completionsOptions.Messages.Add(new ChatMessage(ChatRole.Assistant, "My apologies, but I encountered an unexpected error."));
+            _completionsOptions.Messages.Add(new ChatMessage(ChatRole.Assistant, "My apologies, but I encountered an unexpected error: " + ex.ToString()));
         }
     }
-
-#if FAKE_OPENAI
-    class FakeChatChoice
-    {
-        public CompletionsFinishReason FinishReason { get; set; }
-        public ChatMessage Message { get; set; }
-    }
-#endif
 }
