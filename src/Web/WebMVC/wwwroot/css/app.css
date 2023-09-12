@@ -118,7 +118,7 @@ a:visited {
 
 .concierge {
     position: fixed;
-    right: 1rem;
+    right: -30rem;
     bottom: 2rem;
     width: 25rem;
     height: 35rem;
@@ -127,13 +127,13 @@ a:visited {
     border-radius: 0.5rem;
     box-shadow: 0 2px 7px 2px rgba(0,0,0,0.2);
     background-color: #f3f4f3;
-    transform: translateX(30rem);
+    transform: translateX(0rem);
     transition: transform ease-in-out 0.25s;
     will-change: transform;
 }
 
     .concierge.visible {
-        transform: translateX(0);
+        transform: translateX(-31rem);
     }
 
     .concierge .hide-concierge {

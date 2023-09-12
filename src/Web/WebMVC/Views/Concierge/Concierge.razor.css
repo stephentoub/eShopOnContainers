@@ -18,6 +18,9 @@
         border: none;
         outline: none;
         resize: none;
+        font-weight: 400;
+        font-family: "Segoe UI", arial, helvetica;
+        font-size: 16px;
     }
 
     .concierge-input button {
@@ -25,34 +28,30 @@
     }
 
 .concierge-chat {
-    overflow-y: auto;
+    overflow-y: scroll;
     height: 100%;
     padding: 0.5rem 0.75rem;
     display: flex;
     flex-direction: column;
 }
 
-    .concierge-chat .message, .concierge-chat p {
+    .concierge-chat .message {
         padding: 0.5rem 1rem;
         border-radius: 0.5rem;
         max-width: 85%;
         display: inline-block;
         white-space: break-spaces;
+        margin-bottom: 0.75rem;
+        margin-top: 0.25rem;
     }
 
-        .concierge-chat .message-received, .concierge-chat p:nth-of-type(2n+1) {
+        .concierge-chat .message-Received {
             background-color: #dbdada;
             margin-right: auto;
         }
 
-        .concierge-chat .message-sent, .concierge-chat p:nth-of-type(2n) {
+        .concierge-chat .message-Sent {
             background-color: #1369e9;
             margin-left: auto;
             color: white;
         }
-
-textarea {
-    font-weight: 400;
-    font-family: "Segoe UI", arial, helvetica;
-    font-size: 16px;
-}

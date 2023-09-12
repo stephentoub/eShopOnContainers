@@ -1,20 +1,59 @@
-﻿<div class="concierge-chat">
-    <p>Hello, this is the concierge.</p>
-    <p>Hello, this is the concierge.</p>
-    <p>Hello, this is the concierge. This is a longer message over multiple lines.
+﻿@inject IJSRuntime JS
 
-Here's another paragraph.
-Just a linebreak.
-
-Great!
-    </p>
-    <p>Hello, this is the concierge. This is a longer message over multiple lines.</p>
-    <p>Hello, this is the concierge.</p>
-    <p>Hello, this is the concierge.</p>
-    <p>Hello, this is the concierge.</p>
+<div class="concierge-chat" @ref="chat">
+    @foreach (var message in messages)
+    {
+        <p @key="@message" class="message message-@message.MessageType">@message.Text</p>
+    }
 </div>
 
-<div class="concierge-input">
-    <textarea placeholder="Start chatting..."></textarea>
-    <button title="Send">Send</button>
-</div>
+<form class="concierge-input" @onsubmit="SendMessageAsync">
+    <textarea placeholder="Start chatting..." @ref="@textbox" @bind="messageToSend" @bind:event="oninput" @onkeydown="SendOnEnterAsync"></textarea>
+    <button type="submit" title="Send">Send</button>
+</form>
+
+@code {
+    ElementReference textbox;
+    ElementReference chat;
+    string messageToSend;
+    bool scrollToEndAfterRender;
+    List<ChatMessage> messages = new List<ChatMessage>
+    {
+        new ChatMessage { MessageType = ChatMessage.ChatMessageType.Received, Text = "Hi! I'm the .NET Concierge. How can I help?" }
+    };
+
+    private Task SendMessageAsync()
+    {
+        messageToSend = messageToSend?.Trim();
+        if (!string.IsNullOrEmpty(messageToSend))
+        {
+            messages.Add(new ChatMessage { MessageType = ChatMessage.ChatMessageType.Sent, Text = messageToSend });
+            messageToSend = null;
+            scrollToEndAfterRender = true;            
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private async Task SendOnEnterAsync(KeyboardEventArgs eventArgs)
+    {
+        if (eventArgs.Key == "Enter" && !eventArgs.ShiftKey)
+        {
+            await SendMessageAsync();
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await textbox.FocusAsync();
+        }
+
+        if (scrollToEndAfterRender)
+        {
+            scrollToEndAfterRender = false;
+            await JS.InvokeVoidAsync("scrollToEnd", chat);
+        }
+    }
+}

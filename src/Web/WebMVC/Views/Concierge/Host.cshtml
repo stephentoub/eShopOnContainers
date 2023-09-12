@@ -23,7 +23,12 @@
         <a href="" class="reload">Reload</a>
         <a class="dismiss">🗙</a>
     </div>
-
+    
     <script src="_framework/blazor.server.js"></script>
+    <script>
+        function scrollToEnd(element) {
+            element.scrollTo({ top: element.scrollHeight, behavior: 'smooth' });
+        }
+    </script>
 </body>
 </html>
