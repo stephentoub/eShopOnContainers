@@ -2,7 +2,7 @@
     margin-top: auto;
     display: flex;
     position: relative;
-    border: 2px solid black;
+    border: 2px solid gray;
     border-radius: 0.5rem;
     padding: 0.5rem;
     margin: 0.5rem 0.75rem;
@@ -50,3 +50,9 @@
             margin-left: auto;
             color: white;
         }
+
+textarea {
+    font-weight: 400;
+    font-family: "Segoe UI", arial, helvetica;
+    font-size: 16px;
+}
