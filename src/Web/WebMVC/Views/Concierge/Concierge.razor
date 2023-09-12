@@ -2,9 +2,14 @@
 @inject IJSRuntime JS
 
 <div class="concierge-chat" @ref="chat">
-    @foreach (var message in chatState.Messages.Where(m => m.Role == ChatRole.Assistant || m.Role == ChatRole.User))
+    @foreach (var message in chatState.Messages.Where(m => m.Role == ChatRole.Assistant || m.Role == ChatRole.User || m.Role == ChatRole.Function))
     {
         <p @key="@message" class="message message-@message.Role">@message.Content</p>
+    }
+
+    @if (thinking)
+    {
+        <p class="thinking">Thinking...</p>
     }
 </div>
 
@@ -18,7 +23,7 @@
     ElementReference textbox;
     ElementReference chat;
     string messageToSend;
-    bool scrollToEndAfterRender;
+    bool thinking;
 
     private async Task SendMessageAsync()
     {
@@ -27,9 +32,9 @@
 
         if (!string.IsNullOrEmpty(messageCopy))
         {
-            scrollToEndAfterRender = true;
-            await chatState.AddUserMessageAndGetResponseAsync(messageCopy);   
-            scrollToEndAfterRender = true;
+            thinking = true;
+            await chatState.AddUserMessageAsync(messageCopy, onMessageAdded: StateHasChanged);
+            thinking = false;
         }
     }
 
@@ -48,10 +53,6 @@
             await textbox.FocusAsync();
         }
 
-        if (scrollToEndAfterRender)
-        {
-            scrollToEndAfterRender = false;
-            await JS.InvokeVoidAsync("scrollToEnd", chat);
-        }
+        await JS.InvokeVoidAsync("scrollToEnd", chat);
     }
 }
