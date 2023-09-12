@@ -1,0 +1,41 @@
+﻿@if (_results is not null)
+{
+    <ul class="search-results">
+        @foreach (var product in _results.data)
+        {
+            <li>
+                <div><strong>@product.name</strong>, $@product.price.ToString("0.00")</div>
+                <img src="@product.pictureUri" />
+            </li>
+        }
+    </ul>
+}
+@code {
+    private ParsedResults _results;
+
+    [Parameter] public ChatMessage Message {get; set; }
+
+    protected override void OnInitialized()
+    {
+        try
+        {
+            _results = JsonSerializer.Deserialize<ParsedResults>(Message.Content);
+        }
+        catch
+        {
+        }
+    }
+
+    class ParsedResults
+    {
+        public List<Product> data { get; set; }
+    }
+
+    class Product
+    {
+        public int id { get; set; }
+        public string name { get; set; }
+        public decimal price { get; set; }
+        public string pictureUri { get; set; }
+    }
+}

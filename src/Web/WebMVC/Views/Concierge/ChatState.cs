@@ -12,8 +12,8 @@ public class ChatState
     string aoaiApiKey = Environment.GetEnvironmentVariable("AZUREOPENAI_API_KEY")!;
     string aoaiModel = "Gpt35Turbo_16k";
 
-    const string SearchCatalogFunctionName = "search_catalog";
-    const string AddToBasketFunctionName = "add_to_basket";
+    public const string SearchCatalogFunctionName = "search_catalog";
+    public const string AddToBasketFunctionName = "add_to_basket";
 
 #if FAKE_OPENAI
     string[] RandomMessages = new[]
@@ -102,12 +102,12 @@ public class ChatState
 #if FAKE_OPENAI
                 await Task.Delay(1000);
 
-                if (userText.StartsWith("search "))
+                if (userText.StartsWith("find ", StringComparison.CurrentCultureIgnoreCase))
                 {
                     choice = new FakeChatChoice
                     {
                         FinishReason = CompletionsFinishReason.FunctionCall,
-                        Message = new ChatMessage(ChatRole.Assistant, "I will search for that.")
+                        Message = new ChatMessage(ChatRole.Assistant, "OK, I'll check the catalog.")
                     };
                     choice.Message.FunctionCall = new FunctionCall(SearchCatalogFunctionName, JsonSerializer.Serialize(new
                     {
@@ -115,12 +115,12 @@ public class ChatState
                     }));
                     userText = "";
                 }
-                else if (userText.StartsWith("basket"))
+                else if (userText.Contains("basket"))
                 {
                     choice = new FakeChatChoice
                     {
                         FinishReason = CompletionsFinishReason.FunctionCall,
-                        Message = new ChatMessage(ChatRole.Assistant, "I will add that to your basket.")
+                        Message = new ChatMessage(ChatRole.Assistant, "OK, I'll add that to your basket.")
                     };
                     choice.Message.FunctionCall = new FunctionCall(AddToBasketFunctionName, "{}");
                     userText = "";
@@ -130,7 +130,7 @@ public class ChatState
                     choice = new FakeChatChoice
                     {
                         FinishReason = CompletionsFinishReason.Stopped,
-                        Message = new ChatMessage(ChatRole.Assistant, RandomMessages[Random.Shared.Next(RandomMessages.Length)])
+                        Message = new ChatMessage(ChatRole.Assistant, RandomMessages[new Random().Next(RandomMessages.Length)])
                     };
                 }
 #else
