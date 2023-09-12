@@ -15,7 +15,7 @@ public static class MessageProcessor
         var result = new StringBuilder();
         var prevEnd = 0;
 
-        foreach (Match match in Regex.Matches(message, @"\!\[([^\]]+)\]\s*\((http\:\/\/[^\)]+)\)"))
+        foreach (Match match in Regex.Matches(message, @"\!?\[([^\]]+)\]\s*\((http[^\)]+)\)"))
         {
             var contentToHere = message.Substring(prevEnd, match.Index - prevEnd);
             result.Append(HtmlEncoder.Default.Encode(contentToHere));
