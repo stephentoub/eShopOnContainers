@@ -1,5 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using Azure;
+﻿using Azure;
 using Azure.AI.OpenAI;
 using Microsoft.SemanticKernel.AI.Embeddings;
 using Microsoft.SemanticKernel.Connectors.AI.OpenAI.TextEmbedding;
@@ -129,76 +128,20 @@ public class CatalogController : ControllerBase
         return new PaginatedItemsViewModel<CatalogItem>(pageIndex, pageSize, totalItems, itemsOnPage);
     }
 
-    class FakeSemanticTextMemory : ISemanticTextMemory
-    {
-        private readonly DbSet<CatalogItem> _catalogContext;
-
-        public FakeSemanticTextMemory(DbSet<CatalogItem> catalogContext)
-        {
-            _catalogContext = catalogContext;
-        }
-
-        public Task<string> SaveInformationAsync(
-            string collection,
-            string text,
-            string id,
-            string description = null,
-            string additionalMetadata = null,
-            CancellationToken cancellationToken = default)
-        => throw new NotImplementedException();
-
-        public Task<string> SaveReferenceAsync(
-            string collection,
-            string text,
-            string externalId,
-            string externalSourceName,
-            string description = null,
-            string additionalMetadata = null,
-            CancellationToken cancellationToken = default)
-        => throw new NotImplementedException();
-
-        public Task<MemoryQueryResult> GetAsync(string collection, string key, bool withEmbedding = false, CancellationToken cancellationToken = default)
-        => throw new NotImplementedException();
-
-        public Task RemoveAsync(string collection, string key, CancellationToken cancellationToken = default)
-        => throw new NotImplementedException();
-
-        public async IAsyncEnumerable<MemoryQueryResult> SearchAsync(
-            string collection,
-            string query,
-            int limit = 1,
-            double minRelevanceScore = 0.7,
-            bool withEmbeddings = false,
-            [EnumeratorCancellation] CancellationToken cancellationToken = default)
-        {
-            var results = await _catalogContext.Where(c => c.Name.Contains(query)).ToListAsync(cancellationToken);
-            foreach (var result in results)
-            {
-                yield return new MemoryQueryResult(
-                    new MemoryRecordMetadata(true, result.Id.ToString(), result.Name, result.Description, null, null),
-                    1, null);
-            }
-        }
-
-        public Task<IList<string>> GetCollectionsAsync(CancellationToken cancellationToken = default)
-            => throw new NotImplementedException();
-    }
-
     // GET api/v1/[controller]/items/withsemantic/text[?pageSize=3&pageIndex=10]
     [HttpGet]
     [Route("items/withsemantic/{text:minlength(1)}")]
     public async Task<ActionResult<PaginatedItemsViewModel<CatalogItem>>> ItemsWithSemanticAsync(string text, [FromQuery] int pageSize = 10, [FromQuery] int pageIndex = 0)
     {
-        //await EnsureMemoryStore();
+        await EnsureMemoryStore();
 
-        //var client = new OpenAIClient(new Uri(AoaiEndpoint), new AzureKeyCredential(AoaiKey));
+        var client = new OpenAIClient(new Uri(AoaiEndpoint), new AzureKeyCredential(AoaiKey));
 
         // TODO: This is a hack for demo purposes and is just a placeholder until the catalog db is
         // replaced by one in which we can include embedding vectors as part of each catalog entry.
         // At that point, the query we issue will include the embedding vector for the text we are
         // searching for, and we'll ask the db to include similarity as part of its query. For now for
         // demo purposes, this is just fetching the whole catalog and filtering/sorting it ourselves.
-        s_semanticTextMemory = new FakeSemanticTextMemory(_catalogContext.CatalogItems);
 
         var idsAndScores = new Dictionary<int, double>();
         await foreach (var result in s_semanticTextMemory.SearchAsync(nameof(Catalog), text, limit: int.MaxValue, minRelevanceScore: 0.78))
