@@ -1,4 +1,9 @@
-﻿@inject IJSRuntime JS
+﻿@using Microsoft.AspNetCore.Components.Authorization;
+@inject IJSRuntime JS
+@inject ICatalogService CatalogService
+@inject IBasketService BasketService
+@inject IIdentityParser<ApplicationUser> UserManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <div class="concierge-chat" @ref="chat">
     @foreach (var message in chatState.Messages.Where(m => m.Role == ChatRole.Assistant || m.Role == ChatRole.User))
@@ -21,11 +26,19 @@
 </form>
 
 @code {
-    readonly ChatState chatState = new();
+    ChatState? chatState;
     ElementReference textbox;
     ElementReference chat;
     string messageToSend;
     bool thinking;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        AuthenticationState auth = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        chatState = new ChatState(CatalogService, BasketService, UserManager.Parse(auth.User));
+    }
 
     private async Task SendMessageAsync()
     {

@@ -15,8 +15,8 @@ public class CatalogController : ControllerBase
     private readonly CatalogSettings _settings;
     private readonly ICatalogIntegrationEventService _catalogIntegrationEventService;
 
-    private const string AoaiKey = "TODO GET KEY FROM KEY VAULT";
-    private const string AoaiEndpoint = "TODO GET ENDPOINT FROM CONFIG";
+    private static readonly string s_aoaiEndpoint = Environment.GetEnvironmentVariable("ESHOP_AZURE_OPENAI_ENDPOINT");
+    private static readonly string s_aoaiKey = Environment.GetEnvironmentVariable("ESHOP_AZURE_OPENAI_API_KEY");
 
     public CatalogController(CatalogContext context, IOptionsSnapshot<CatalogSettings> settings, ICatalogIntegrationEventService catalogIntegrationEventService)
     {
@@ -135,7 +135,7 @@ public class CatalogController : ControllerBase
     {
         await EnsureMemoryStore();
 
-        var client = new OpenAIClient(new Uri(AoaiEndpoint), new AzureKeyCredential(AoaiKey));
+        var client = new OpenAIClient(new Uri(s_aoaiEndpoint), new AzureKeyCredential(s_aoaiKey));
 
         // TODO: This is a hack for demo purposes and is just a placeholder until the catalog db is
         // replaced by one in which we can include embedding vectors as part of each catalog entry.
@@ -358,8 +358,8 @@ public class CatalogController : ControllerBase
                     var memoryStore = await SqliteMemoryStore.ConnectAsync("catalog.sqlitedb");
                     s_embeddingGeneration = new AzureTextEmbeddingGeneration(
                             "TextEmbeddingAda002_1",
-                            AoaiEndpoint,
-                            AoaiKey);
+                            s_aoaiEndpoint,
+                            s_aoaiKey);
                     s_semanticTextMemory = new SemanticTextMemory(memoryStore, s_embeddingGeneration);
 
                     IList<string> collections = await s_semanticTextMemory.GetCollectionsAsync();

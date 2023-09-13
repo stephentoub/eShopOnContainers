@@ -43,6 +43,8 @@ services:
     depends_on:
       - sqldata
       - rabbitmq
+    env_file:
+      - .env
 
   ordering-api:
     image: ${REGISTRY:-eshop}/ordering.api:${PLATFORM:-linux}-${TAG:-latest}
@@ -143,6 +145,8 @@ services:
       dockerfile: Web/WebMVC/Dockerfile
     depends_on:
       - webshoppingagg
+    env_file:
+      - .env
 
   webhooks-client:
     image: ${REGISTRY:-eshop}/webhooks.client:${PLATFORM:-linux}-${TAG:-latest}
